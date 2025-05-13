@@ -1,3 +1,4 @@
+use std::str::FromStr;
 use celestia_rpc::StateClient;
 use celestia_types::blob::RawBlob;
 use celestia_types::consts::appconsts;

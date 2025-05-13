@@ -9,3 +9,5 @@ celestia-rpc = { version = "0.9.1" }
 celestia-types = { version = "0.10.1" }
 jsonrpsee = { version = "0.24.9" }
 rand = { version = "0.9.1", features = ["thread_rng"] }
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"

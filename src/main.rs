@@ -5,6 +5,7 @@ use celestia_types::nmt::Namespace;
 use celestia_types::{AppVersion, Blob};
 use jsonrpsee::http_client::HttpClient;
 use rand::{Rng, RngCore};
+use tracing_subscriber;
 
 pub(crate) const APP_VERSION: AppVersion = AppVersion::V3;
 const DEFAULT_GAS_PER_BLOB_BYTE: usize = 8;
@@ -36,7 +37,7 @@ async fn submit_blobs(client: &HttpClient, blobs: Vec<Vec<u8>>, namespace: Names
         .saturating_mul(appconsts::SHARE_SIZE)
         .saturating_mul(DEFAULT_GAS_PER_BLOB_BYTE)
         .saturating_add(PFB_GAS_FIXED_COST) as u64;
-    println!("Gas: {}", gas);
+    tracing::info!("Gas: {}", gas);
 
     let mut tx_config = celestia_rpc::TxConfig::default();
     tx_config.with_gas_price(GAS_PRICE).with_gas(gas);
@@ -44,11 +45,13 @@ async fn submit_blobs(client: &HttpClient, blobs: Vec<Vec<u8>>, namespace: Names
         .state_submit_pay_for_blob(&raw_blobs, tx_config)
         .await
         .unwrap();
-    println!("{:?}", tx_response);
+    tracing::info!("{:?}", tx_response);
 }
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt::init();
+
     let mut rng = rand::rng();
     let client = jsonrpsee::http_client::HttpClientBuilder::default()
         .build("http://127.0.0.1:26658")
@@ -69,7 +72,7 @@ async fn main() {
             blobs.push(blob);
         }
         let namespace = NAMESPACES[rng.random_range(0..NAMESPACES.len())];
-        println!(
+        tracing::info!(
             "GOING TO SUBMIT {} BLOBS TO NS {}",
             blobs.len(),
             String::from_utf8_lossy(&namespace.0)

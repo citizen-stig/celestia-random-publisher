@@ -49,10 +49,6 @@ async fn submit_blobs(client: &HttpClient, blobs: Vec<Vec<u8>>, namespace: Names
 
 #[tokio::main]
 async fn main() {
-    // let blob = vec![1, 2, 3];
-
-    // submit_blob(&client, blob, NAMESPACE_PRECEDING_1).await;
-
     let mut rng = rand::rng();
     let client = jsonrpsee::http_client::HttpClientBuilder::default()
         .build("http://127.0.0.1:26658")
@@ -60,8 +56,11 @@ async fn main() {
     let sizes = [100, 512, 1024];
 
     loop {
-        // TODO: Handle zero blobs and sleep for the next block head.
-        let num_blobs = rng.random_range(1..=3);
+        let num_blobs = rng.random_range(0..=3);
+        if num_blobs == 0 {
+            tokio::time::sleep(std::time::Duration::from_secs(6)).await;
+            continue;
+        }
         let mut blobs = Vec::with_capacity(num_blobs);
         for _ in 0..num_blobs {
             let size = sizes[rng.random_range(0..sizes.len())];

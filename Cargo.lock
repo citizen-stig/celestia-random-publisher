@@ -396,6 +396,7 @@ dependencies = [
  "celestia-rpc",
  "celestia-types",
  "jsonrpsee",
+ "rand 0.9.1",
  "tokio",
 ]
 

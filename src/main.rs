@@ -2,6 +2,7 @@ use celestia_rpc::StateClient;
 use celestia_types::blob::RawBlob;
 use celestia_types::consts::appconsts;
 use celestia_types::nmt::Namespace;
+use celestia_types::state::AccAddress;
 use celestia_types::{AppVersion, Blob};
 use jsonrpsee::http_client::HttpClient;
 use rand::{Rng, RngCore};
@@ -15,7 +16,7 @@ const GAS_PRICE: f64 = 0.002101;
 
 const NAMESPACE_PRECEDING_1: Namespace = Namespace::const_v0(*b"\0\0aaa-test");
 const NAMESPACE_PRECEDING_2: Namespace = Namespace::const_v0(*b"\0\0bbb-test");
-const NAMESPACE_PRECEDING_SAME: Namespace = Namespace::const_v0(*b"\0\0sov-test");
+const NAMESPACE_PRECEDING_SAME: Namespace = Namespace::const_v0(*b"\0\0sov-tesx");
 
 const NAMESPACES: [Namespace; 3] = [
     NAMESPACE_PRECEDING_1,
@@ -23,12 +24,18 @@ const NAMESPACES: [Namespace; 3] = [
     NAMESPACE_PRECEDING_SAME,
 ];
 
-async fn submit_blobs(client: &HttpClient, blobs: Vec<Vec<u8>>, namespace: Namespace) {
+async fn submit_blobs(
+    client: &HttpClient,
+    signer: AccAddress,
+    blobs: Vec<Vec<u8>>,
+    namespace: Namespace,
+) {
     let mut shares_needed = 0;
     let mut raw_blobs = Vec::with_capacity(blobs.len());
 
     for blob in blobs {
-        let cel_blob = Blob::new(namespace, blob.to_vec(), APP_VERSION).unwrap();
+        let cel_blob =
+            Blob::new_with_signer(namespace, blob.to_vec(), signer.clone(), APP_VERSION).unwrap();
         shares_needed += cel_blob.shares_len();
         raw_blobs.push(RawBlob::from(cel_blob));
     }
@@ -53,6 +60,7 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
     let mut rng = rand::rng();
+    let signer = AccAddress::from_str("celestia1las83d0dt9gew3faq2mxp2gtupq5drclee9snr").unwrap();
     let client = jsonrpsee::http_client::HttpClientBuilder::default()
         .build("http://127.0.0.1:26658")
         .expect("Client initialization is valid");
@@ -77,6 +85,6 @@ async fn main() {
             blobs.len(),
             String::from_utf8_lossy(&namespace.0)
         );
-        submit_blobs(&client, blobs, namespace).await;
+        submit_blobs(&client, signer.clone(), blobs, namespace).await;
     }
 }

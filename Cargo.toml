@@ -1,0 +1,10 @@
+[package]
+name = "celestia-random-publisher"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.45", features = ["full"] }
+celestia-rpc = { version = "0.9.1" }
+celestia-types = { version = "0.10.1" }
+jsonrpsee = { version = "0.24.9" }
